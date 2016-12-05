@@ -76,8 +76,8 @@ public class KdTree<Point extends PointI>
 				ArrayList<Point> points_droite = new ArrayList (points.subList(index_m+1,points.size()));
 				node.child_left_=buildTree(points_gauche, depth+1,max_depth);
 				node.child_right_=buildTree(points_droite, depth+1,max_depth);
-				return node;
 			}
+			return node;
 		}
 		else{
 			Point somme=points.get(0);
@@ -88,7 +88,6 @@ public class KdTree<Point extends PointI>
 			KdNode node=new KdNode(somme,d_);
 			return node;
 		}
-		return null;
 	}
 	
 	/////////////////
