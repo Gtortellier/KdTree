@@ -1,6 +1,7 @@
 package kdtree;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class KdTree<Point extends PointI>
 {
@@ -59,16 +60,48 @@ public class KdTree<Point extends PointI>
 	/** Initialize the kd-tree from the input point set
 	 *  The input dimension should match the one of the points
 	 */
-	KdTree(int dim, ArrayList<Point> points, int max_depth) {
-		this.dim_ = dim;
-		this.n_points_ = points.size();
-		
-		//TODO: replace by a balanced initialization
-		this.n_points_=0;
-		for(Point p : points) {
-			insert(p);
+	private KdNode buildTree(ArrayList<Point> points,int depth, int max_depth){
+		if (points.size()==0){
+			return null;
 		}
+		int d_=depth%this.dim_;// dimension de la coupe	
+		if (depth<max_depth){
+			sort(d_,points);
+			int index_m=points.size()/2;
+			Point mediane = points.get(index_m);
+			insert(mediane);
+			KdNode node=new KdNode(mediane, d_);
+			if (points.size()>1){
+				ArrayList<Point> points_gauche = new ArrayList (points.subList(0,index_m));
+				ArrayList<Point> points_droite = new ArrayList (points.subList(index_m+1,points.size()));
+				node.child_left_=buildTree(points_gauche, depth+1,max_depth);
+				node.child_right_=buildTree(points_droite, depth+1,max_depth);
+				return node;
+			}
+		}
+		else{
+			Point somme=points.get(0);
+			for(int i=1;i<points.size();i++){
+				somme.add(points.get(i));
+			}
+			somme.div(points.size());
+			KdNode node=new KdNode(somme,d_);
+			return node;
+		}
+		return null;
+	}
 	
+	/////////////////
+	/// Comparator///
+	/////////////////
+	public void sort (int d, ArrayList<Point> points){
+		for (int i=0;i<this.n_points_-1;i++){
+			for (int j=0;i<this.n_points_-i-1;j++){
+				if (points.get(j+1).get(d)<points.get(j).get(d)){
+					Collections.swap(points,j,j+1);
+				}
+			}
+		}
 	}
 	  
 	/////////////////
@@ -150,7 +183,7 @@ public class KdTree<Point extends PointI>
 	/// Helper Function ///
 	///////////////////////
 
-    /** Add the points in the leaf nodes of the subrre defined by root 'node'
+    /** Add the points in the leaf nodes of the subtree defined by root 'node'
      * to the array 'point'
      */
 	private void getPointsFromLeaf(KdNode node, ArrayList<Point> points)
